@@ -18,7 +18,7 @@ int main(int argc, char** argv) {
   int size;
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-  int number;
+  int number,flag;
   if (rank == 0) {
     
     printf("Process %d inputting number and sending it\n", rank);
@@ -29,6 +29,7 @@ int main(int argc, char** argv) {
     MPI_Send(&number, 1, MPI_INT, 2, 0, MPI_COMM_WORLD);
     MPI_Send(&number, 1, MPI_INT, 3, 0, MPI_COMM_WORLD);
   } 
+
   else if (rank == 1) {
     
     MPI_Recv(&number, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
@@ -36,28 +37,33 @@ int main(int argc, char** argv) {
     
     //Even/Odd Routine
     if(number%2==0)
-      printf("The number received is even\n");
+      flag = 0;
     else
-      printf("The number received is odd\n");
+      flag = 1;
+
+    MPI_Send(&flag, 1, MPI_INT, 4, 0, MPI_COMM_WORLD);
   }
+
   else if (rank == 2) {
 
     MPI_Recv(&number, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     //Check if Prime/Composite Routine
-    int flag = 0;
+    int f = 0;
     for(int i = 2; i < number/2; i++)
     {
       if(number%i==0)
       {
-        flag = 1;
-        printf("Number received is composite\n");
+        f = 1;
+        flag = 0;
         break;
       }
     }
-    if(flag == 0)
-      printf("Number received is Prime\n");
+    if(f == 0)
+      flag = 1;
 
+    MPI_Send(&flag, 1, MPI_INT, 5, 0, MPI_COMM_WORLD);
   }
+
   else if (rank == 3) {
     MPI_Recv(&number, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     
@@ -75,8 +81,39 @@ int main(int argc, char** argv) {
       n2 = n2/10;
     }
     if(number == sum)
-      printf("Number received is an armstrong number\n");
+      flag = 0;
     else
+      flag = 1;
+    MPI_Send(&flag, 1, MPI_INT, 6, 0, MPI_COMM_WORLD);
+  }
+
+  else if(rank == 4) {
+
+    MPI_Recv(&flag, 1, MPI_INT, 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    printf("Process %d received flag %d from process 0\n", rank, flag);
+    if(flag == 0) 
+      printf("Number received is even\n");
+    else if(flag ==1)
+      printf("Number received is odd\n");
+  }
+
+  else if(rank == 5) {
+
+    MPI_Recv(&flag, 1, MPI_INT, 2, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    printf("Process %d received flag %d from process 0\n", rank, flag);
+    if(flag == 0)
+      printf("Number received is composite\n");
+    else if(flag == 1) 
+      printf("Number received is prime\n");
+  }
+
+  else if(rank == 6) {
+
+    MPI_Recv(&flag, 1, MPI_INT, 3, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    printf("Process %d received flag %d from process 0\n", rank, flag);
+    if(flag == 0) 
+      printf("Number received is an armstrong number\n");
+    else if(flag == 0)
       printf("Number received is not an armstrong number\n");
   }
 
