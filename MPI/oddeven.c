@@ -10,7 +10,8 @@ int main(int argc, char** argv) {
   int size;
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-  int number;
+  int number, flag;
+
   if (rank == 0) {
     
     printf("Process %d inputting number and sending it\n", rank);
@@ -19,15 +20,26 @@ int main(int argc, char** argv) {
     
     MPI_Send(&number, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
   } 
+
   else if (rank == 1) {
     
     MPI_Recv(&number, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     printf("Process %d received number %d from process 0\n", rank, number);
-    
-    if(number%2==0)
-      printf("The number recieved is even\n");
-    else
-      printf("The number recieved is odd\n");
+    if(number%2==0) 
+      flag = 1;
+    else 
+      flag = 0;
+    MPI_Send(&flag, 1, MPI_INT, 2, 0, MPI_COMM_WORLD);
+  }
+
+  else if(rank == 2) {
+
+    MPI_Recv(&flag, 1, MPI_INT, 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    printf("Process %d received flag %d from process 0\n", rank, flag);
+    if(flag == 1) 
+      printf("Number received is even\n");
+    else if(flag == 0)
+      printf("Number received is odd\n");
   }
 
   MPI_Finalize();
