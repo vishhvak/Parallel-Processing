@@ -14,8 +14,8 @@ int main(int argc, char **argv)
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
   for(i=0;i<4;i++)
-        num[i]=i+3;
-        
+        num[i]= (rand() % 100 + 1);
+
   MPI_Gather(&num[rank],1,MPI_INT,m,1,MPI_INT,0,MPI_COMM_WORLD);
 
   if(rank == 0) {
